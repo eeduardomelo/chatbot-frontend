@@ -2,7 +2,7 @@ import {SERVICE_API, API_TOKEN} from '@env';
 
 export function getProtocol(cpf) {
   console.log('=======>', `${SERVICE_API}/new/${cpf}`);
-  return fetch(`http://172.18.0.1:8080/protocol/new/${cpf}`, {
+  return fetch(`${SERVICE_API}/new/${cpf}`, {
     method: 'GET',
     headers: {
       'Content-type': 'application/json',
@@ -44,7 +44,7 @@ export function storeHistoric(data, protocol) {
     protocol: protocol,
   };
   console.log('body =======================>', body);
-  return fetch(`http://172.18.0.1:8080/protocol/historic`, {
+  return fetch(`${SERVICE_API}/historic`, {
     method: 'POST',
     headers: {
       'Content-type': 'application/json',
