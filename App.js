@@ -4,14 +4,20 @@ import {Dialogflow_V2} from 'react-native-dialogflow';
 import Voice from 'react-native-voice';
 //Importando configurações
 import {private_key, client_email} from './app.json';
-import {View} from 'react-native';
-
+import {View, Text} from 'react-native';
+import {getProtocol, storeHistoric} from './api';
 export default class Chat extends React.Component {
   state = {
     messages: [],
+    currentMessage: {},
+    protocol: false,
   };
 
-  componentDidMount() {
+  async componentDidMount() {
+    // We need to integrate with APP of HMV to get CPF or another data of current user
+    const cpf = '68804066024';
+    const protocol = await getProtocol(cpf);
+    console.log('protocol==============>', protocol);
     this.setState({
       messages: [
         {
@@ -25,6 +31,7 @@ export default class Chat extends React.Component {
           },
         },
       ],
+      protocol: protocol.protocol,
     });
     Dialogflow_V2.onListeningStarted(()=>{})
     Dialogflow_V2.setConfiguration(
@@ -48,7 +55,7 @@ export default class Chat extends React.Component {
       messages: GiftedChat.append(previousState.messages, messages),
     }));
     messages.forEach(message => {
-      console.log(message.text);      
+      console.log(message.text);
       Dialogflow_V2.requestQuery(
         message.text,
         result => {
@@ -60,15 +67,19 @@ export default class Chat extends React.Component {
               createdAt: new Date(),
               user: {
                 _id: 2,
-                name: 'Bot',
-                avatar: 'https://placeimg.com/140/140/any',
+                name: 'Atendimento HMV',
               },
             },
           ];
-          console.log('messages ======>', messages)
           this.setState(previousState => ({
             messages: GiftedChat.append(previousState.messages, messages),
-          }));
+            currentMessage: result
+          }), async ()=>{
+            const  { currentMessage, protocol } = this.state                        
+            const response = await storeHistoric(currentMessage, protocol)
+
+            console.log('response====>', response)
+          });          
         },
         error => console.log(error),
       );
@@ -86,7 +97,7 @@ export default class Chat extends React.Component {
           user={{
             _id: 1,
           }}
-        />        
+        />            
       </View>
     );
   }
